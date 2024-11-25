@@ -1,4 +1,4 @@
-# ![nuke Bot](https://s7.gifyu.com/images/SGnpL.gif)
+# ![nuke Bot](https://i.ibb.co/Jmn5VRR/static.png)
 
 A powerful and efficient Discord bot script designed to clean up a guild by removing roles, deleting channels, and banning members.
 
